@@ -1,5 +1,7 @@
 ﻿namespace FGene
 
+open Nessos.Streams
+
 open FGene.Global
 open FGene.Global.Random
 open FGene.Population
@@ -54,7 +56,7 @@ type public Runtime<'T when 'T : comparison>(fitness : IChromosome<'T> -> float)
     member public this.Run() = 
         let pop = _population.Value
 
-        this.Fit(pop.Chromosomes)
+        pop.Chromosomes <- this.Fit(pop.Chromosomes |> Stream.ofSeq) |> Stream.toSeq |> Seq.toList
 
         let mutable best = (pop.Chromosomes |> Seq.maxBy(fun x -> x.Fitness))
         let mutable bestFit = best.Fitness
@@ -66,21 +68,17 @@ type public Runtime<'T when 'T : comparison>(fitness : IChromosome<'T> -> float)
 
         while not(_stop i bestFit) do
             let chosen = this.Select(pop)
-                          |> Seq.sortBy(fun _ -> rng.NextDouble())
-                          |> Seq.pair
-                          |> Seq.map (fun (ch1, ch2) -> ch1 <||> ch2)
-                          |> Seq.collect (fun x -> seq { yield fst x 
-                                                         yield snd x })
-                          |> Seq.toList
+                          |> Stream.sortBy(fun _ -> rng.NextDouble())
+                          |> Stream.pair
+                          |> Stream.map (fun (ch1, ch2) -> ch1 <||> ch2)
+                          |> Stream.collect (fun x -> seq { yield fst x 
+                                                            yield snd x } |> Stream.ofSeq)
+                          |> Stream.map(fun x -> x <~~ match _isAdaptiveMutation with
+                                                          | true -> _mutationRate + (diff * sqrt((previousBestFits |> average) / (previousBestFits |> List.max)))
+                                                          | false -> _mutationRate)
+                          |> this.Fit
 
-            let mutated = chosen
-                         |> Seq.map(fun x -> x <~~ match _isAdaptiveMutation with
-                                                   | true -> _mutationRate + (diff * sqrt((previousBestFits |> average) / (previousBestFits |> List.max)))
-                                                   | false -> _mutationRate)
-                         |> Seq.toList
-
-            this.Fit(mutated)
-            pop.Chromosomes <- mutated
+            pop.Chromosomes <- chosen |> Stream.toSeq |> Seq.toList
 
             let newBest = pop.Chromosomes |> Seq.maxBy(fun x -> x.Fitness)
             previousBestFits <- if i > 1000 then (bestFit :: previousBestFits.[0..999]) else bestFit :: previousBestFits
@@ -98,8 +96,8 @@ type public Runtime<'T when 'T : comparison>(fitness : IChromosome<'T> -> float)
         printfn "%s.\t%s" (i.ToString()) (bestText)
         pop
 
-    member private this.Fit(chromosomes : seq<IChromosome<'T>>) = 
-        chromosomes |> Seq.map(fun c -> async { c.Fitness <- fitness(c) }) |> Async.Parallel |> Async.RunSynchronously |> ignore
+    member private this.Fit(chromosomes : Stream<IChromosome<'T>>) = 
+        chromosomes |> Stream.map(fun c -> c.Fitness <- fitness(c); c)
 
     member private this.Select(pop : Population<'T>) = 
         pop |> apply <| _algorithm.Value

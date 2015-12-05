@@ -43,6 +43,16 @@ module Seq =
           |> Seq.filter fst 
           |> Seq.map snd
 
+module Stream = 
+    open Nessos.Streams
+    let pair s =
+        s |> Stream.toSeq
+          |> Seq.pairwise 
+          |> Stream.ofSeq
+          |> Stream.mapi (fun i x -> i % 2 = 0, x) 
+          |> Stream.filter fst 
+          |> Stream.map snd
+
 module Random =
     open FizzWare.NBuilder
 

@@ -25,16 +25,16 @@ type Gene<'T when 'T : equality and
 
     val private _contents : 'T
     val private _mutator : option<'T -> 'T>
+    val private _typedef : Type
 
-    new(v : 'T, ?mutator : 'T -> 'T) = { _contents = v; _mutator = mutator }
+    new(v : 'T, ?mutator : 'T -> 'T) = { _contents = v; _mutator = mutator; _typedef = typedefof<'T> }
 
     interface IGene<'T> with
         member this.Contents with get() = this._contents
         member this.Mutate() = 
-            let typedef = typedefof<'T>
             let newVal = 
                 match this._mutator with 
-                | None -> unbox(match typedef with     
+                | None -> unbox(match this._typedef with     
                                 | x when x = typedefof<byte> -> box(byte(rng.Next(0, 256)))   
                                 | x when x = typedefof<string> -> 
                                     box(match ((this._contents :> obj) :?> string) with
