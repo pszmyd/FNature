@@ -16,7 +16,7 @@ type IGene<'T when 'T : comparison> =
     inherit IComparable<IGene<'T>>
     inherit IEquatable<IGene<'T>>
 
-/// Represents a gene object fo which chromosomes are composed
+/// Represents a gene object of which chromosomes are composed
 [<StructAttribute>]
 [<CustomEquality>]
 [<CustomComparison>]

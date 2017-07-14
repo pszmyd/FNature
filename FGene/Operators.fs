@@ -22,27 +22,34 @@ module Operators =
         (x, y)
 
     /// Single-point crossover operator
-    let inline (<|>) (x : ^T when ^T :> IChromosome<'U>) (y : ^T) =
-        let splice = Random.rng.Next(0, x.Contents.Length-1)
+    let inline (<|>) (x : ^T when ^T :> IChromosome<'U>) (y : ^T) (chance: float) =
+        match chance with
+        | c when Random.rng.NextDouble() < c -> 
+            let splice = Random.rng.Next(0, x.Contents.Length-1)
 
-        let xx = spawn x
-        let yy = spawn y
+            let xx = spawn x
+            let yy = spawn y
 
-        for i in 0..splice do (xx.Contents, yy.Contents) <-> i |> ignore
+            for i in 0..splice do (xx.Contents, yy.Contents) <-> i |> ignore
 
-        (xx, yy)
+            (xx, yy)
+        | _ -> (x, y)
+
 
     /// Double-point crossover operator
-    let inline (<||>) (x : ^T when ^T :> IChromosome<'U>) (y : ^T) =
-        let spliceStart = Random.rng.Next(0, x.Contents.Length-1)
-        let spliceEnd = Random.rng.Next(spliceStart+1, x.Contents.Length-1)
+    let inline (<||>) (x : ^T when ^T :> IChromosome<'U>) (y : ^T) (chance: float) =
+        match chance with
+        | c when Random.rng.NextDouble() < c -> 
+            let spliceStart = Random.rng.Next(0, x.Contents.Length-1)
+            let spliceEnd = Random.rng.Next(spliceStart+1, x.Contents.Length-1)
 
-        let xx = spawn x
-        let yy = spawn y
+            let xx = spawn x
+            let yy = spawn y
 
-        for i in spliceStart..spliceEnd do (xx.Contents, yy.Contents) <-> i |> ignore
+            for i in spliceStart..spliceEnd do (xx.Contents, yy.Contents) <-> i |> ignore
 
-        (xx, yy)
+            (xx, yy)
+        | _ -> (x, y)
 
     /// Mutation operator
     let inline (<~~) (x : ^T when ^T :> IChromosome<'U>) (chance : float) = 

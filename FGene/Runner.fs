@@ -17,6 +17,7 @@ type public Runtime<'T when 'T : comparison>(fitness : IChromosome<'T> -> float)
     let mutable _population = lazy(Population<'T>(100, 10))
     let mutable _stop = fun (epoch : int) (fitness : float) -> false
     let mutable _mutationRate = 0.0
+    let mutable _crossoverRate = 1.0
     let mutable _maxMutationRate = 0.0
     let mutable _isAdaptiveMutation = false;
 
@@ -47,9 +48,13 @@ type public Runtime<'T when 'T : comparison>(fitness : IChromosome<'T> -> float)
         _isAdaptiveMutation <- true
         this 
 
-    member this.WithMutation (value : float)=
+    member this.WithMutation (value : float) =
         _mutationRate <- value
         _isAdaptiveMutation <- false
+        this 
+
+    member this.WithCrossover (value : float) =
+        _crossoverRate <- value
         this 
         
 
@@ -70,7 +75,7 @@ type public Runtime<'T when 'T : comparison>(fitness : IChromosome<'T> -> float)
             let chosen = this.Select(pop)
                           |> Stream.sortBy(fun _ -> rng.NextDouble())
                           |> Stream.pair
-                          |> Stream.map (fun (ch1, ch2) -> ch1 <||> ch2)
+                          |> Stream.map (fun (ch1, ch2) -> _crossoverRate |> (ch1 <||> ch2))
                           |> Stream.collect (fun x -> seq { yield fst x 
                                                             yield snd x } |> Stream.ofSeq)
                           |> Stream.map(fun x -> x <~~ match _isAdaptiveMutation with

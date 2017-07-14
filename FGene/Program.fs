@@ -30,10 +30,11 @@ module Main =
                                              |> Seq.sum))
 
 
-        (runner
+        runner
             .WithPopulation(Population<char>(100, target.Length))
             .WithAlgorithm(Selection.Algorithms.StochasticUniform 0)
-            .WithMutation 0.005)
+            .WithMutation(0.001)
+            .WithCrossover(0.8)
             .StopWhenFitness(127.0)
             .Run()
             .Chromosomes |> ignore

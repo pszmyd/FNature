@@ -11,7 +11,7 @@
     <AssemblyName>FGene</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <TargetFSharpCoreVersion>4.4.1.0</TargetFSharpCoreVersion>
     <Name>FGene</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -68,12 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FizzWare.NBuilder">
-      <HintPath>..\packages\NBuilder.3.0.1\lib\FizzWare.NBuilder.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FizzWare.NBuilder-Silverlight">
-      <HintPath>..\packages\NBuilder.3.0.1\lib\Silverlight 3.0\FizzWare.NBuilder-Silverlight.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\NBuilder.4.0.0\lib\net40\FizzWare.NBuilder.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
